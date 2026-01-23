@@ -1,0 +1,13 @@
+The candidate answered:
+
+"{answer}"
+
+Generate ONE follow-up interview question.
+Constraints:
+- One sentence only
+- No bullet points
+- No explanations
+- No markdown
+- No multiple questions
+
+Output ONLY the question.
