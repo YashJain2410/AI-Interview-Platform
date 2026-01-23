@@ -1,5 +1,6 @@
-from .llm_router.router import LLMRouter
-from .prompts.loader import load_prompt
+from backend.ai.llm_router.router import LLMRouter
+from backend.ai.prompts.loader import load_prompt
+from backend.ai.llm_router.base import LLMResponse
 
 class AIInterview:
     def __init__(self):
@@ -7,8 +8,10 @@ class AIInterview:
 
     async def ask_question(self, stage: str) -> str:
         prompt = load_prompt("interviewer.txt").format(stage = stage)
-        return await self.llm_router.generate(prompt)
+        response: LLMResponse = await self.llm_router.generate(prompt)
+        return response.text
     
     async def ask_followup(self, answer: str) -> str:
         prompt = load_prompt("followup.txt").format(answer = answer)
-        return await self.llm_router.generate(prompt)
+        response: LLMResponse = await self.llm_router.generate(prompt)
+        return response.text
