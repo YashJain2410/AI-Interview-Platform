@@ -1,6 +1,6 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
-from realtime.sessions.manager import SessionManager
+from backend.realtime.sessions.manager import SessionManager
 from .connection import ConnectionManager
 
 router = APIRouter()
