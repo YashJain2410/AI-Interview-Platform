@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Interview Platform</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    #status {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 5px;
+    }
+    .log {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Interview Platform</h1>
+  
+  <button id="startBtn" onclick="start()">Start Interview</button>
+  <button id="stopBtn" onclick="stop()" disabled>Stop Interview</button>
+  
+  <div id="status">Status: Not connected</div>
+  <div class="log" id="log"></div>
+
+  <script>
+    let pc = null;
+    let stream = null;
+    
+    function log(message) {
+      console.log(message);
+      const logDiv = document.getElementById('log');
+      const time = new Date().toLocaleTimeString();
+      logDiv.innerHTML += `[${time}] ${message}<br>`;
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+    
+    function updateStatus(message) {
+      document.getElementById('status').textContent = `Status: ${message}`;
+    }
+
+    async function start() {
+      try {
+        log("Requesting microphone access...");
+        updateStatus("Requesting microphone...");
+
+        // CRITICAL: Specify exact audio constraints
+        const rawStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            sampleRate: 48000,
+            channelCount: 1
+          }
+        });
+
+        // Log actual audio settings
+        const rawTrack = rawStream.getAudioTracks()[0];
+        const rawSettings = rawTrack.getSettings();
+        log(`Raw microphone settings: ${rawSettings.sampleRate}Hz, ${rawSettings.channelCount} channel(s)`);
+        
+        // FORCE mono using AudioContext if browser gives us stereo
+        if (rawSettings.channelCount !== 1) {
+          log(`Converting ${rawSettings.channelCount} channels to mono...`);
+          
+          const audioContext = new AudioContext({ sampleRate: 48000 });
+          const source = audioContext.createMediaStreamSource(rawStream);
+          
+          // Create mono channel merger
+          const merger = audioContext.createChannelMerger(1);
+          
+          // Connect and force mono
+          source.connect(merger, 0, 0);
+          
+          // Create destination
+          const destination = audioContext.createMediaStreamDestination();
+          merger.connect(destination);
+          
+          stream = destination.stream;
+          log(`Converted to mono stream`);
+        } else {
+          stream = rawStream;
+        }
+        
+        // Verify final stream
+        const audioTrack = stream.getAudioTracks()[0];
+        const settings = audioTrack.getSettings();
+        log(`Microphone settings: ${settings.sampleRate}Hz, ${settings.channelCount} channel(s)`);
+        log(`Sample size: ${settings.sampleSize || 'unknown'} bits`);
+        log(`Echo cancellation: ${settings.echoCancellation}`);
+        log(`Noise suppression: ${settings.noiseSuppression}`);
+        log(`Auto gain control: ${settings.autoGainControl}`);
+        
+        if (settings.sampleRate !== 48000) {
+          log(`WARNING: Sample rate is ${settings.sampleRate}Hz, expected 48000Hz`);
+        }
+        
+        if (settings.channelCount !== 1) {
+          log(`WARNING: Channel count is ${settings.channelCount}, expected 1 (mono)`);
+        }
+
+        log("Microphone access granted");
+        updateStatus("Creating connection...");
+
+        // Create peer connection
+        pc = new RTCPeerConnection({
+          iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' }
+          ]
+        });
+
+        // ICE candidate logging
+        pc.onicecandidate = e => {
+          if (e.candidate) {
+            log(`ICE candidate: ${e.candidate.type}`);
+          } else {
+            log("ICE gathering complete");
+          }
+        };
+
+        // Connection state monitoring
+        pc.onconnectionstatechange = () => {
+          log(`Connection state: ${pc.connectionState}`);
+          updateStatus(pc.connectionState);
+          
+          if (pc.connectionState === 'connected') {
+            log("✓ Connected! You can speak now.");
+            updateStatus("Connected - Speak now!");
+          } else if (pc.connectionState === 'failed') {
+            log("✗ Connection failed");
+            updateStatus("Connection failed");
+          } else if (pc.connectionState === 'closed') {
+            log("Connection closed");
+            updateStatus("Disconnected");
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+          }
+        };
+
+        // ICE connection state
+        pc.oniceconnectionstatechange = () => {
+          log(`ICE state: ${pc.iceConnectionState}`);
+        };
+
+        // Handle incoming audio from AI
+        pc.ontrack = e => {
+          log(`Received remote ${e.track.kind} track`);
+          
+          if (e.track.kind === 'audio') {
+            const audio = new Audio();
+            audio.srcObject = e.streams[0];
+            audio.autoplay = true;
+            audio.onplay = () => log("AI audio playback started");
+            document.body.appendChild(audio);
+          }
+        };
+
+        // Add local audio track
+        stream.getTracks().forEach(track => {
+          log(`Adding ${track.kind} track to peer connection`);
+          pc.addTrack(track, stream);
+        });
+
+        // Create and send offer
+        log("Creating offer...");
+        const offer = await pc.createOffer({
+          offerToReceiveAudio: true
+        });
+        
+        await pc.setLocalDescription(offer);
+        log("Offer created, sending to server...");
+
+        const res = await fetch("http://localhost:8000/webrtc/offer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sdp: offer.sdp,
+            type: offer.type
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error(`Server error: ${res.status}`);
+        }
+
+        const answer = await res.json();
+        log("Received answer from server");
+
+        await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        log("Remote description set");
+        
+        // Update UI
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('stopBtn').disabled = false;
+
+      } catch (error) {
+        log(`ERROR: ${error.message}`);
+        updateStatus("Error - " + error.message);
+        console.error(error);
+      }
+    }
+
+    function stop() {
+      log("Stopping interview...");
+      
+      if (stream) {
+        stream.getTracks().forEach(track => {
+          track.stop();
+          log(`Stopped ${track.kind} track`);
+        });
+        stream = null;
+      }
+
+      if (pc) {
+        pc.close();
+        log("Peer connection closed");
+        pc = null;
+      }
+
+      // Remove audio elements
+      document.querySelectorAll('audio').forEach(audio => audio.remove());
+
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+      updateStatus("Stopped");
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (pc || stream) {
+        stop();
+      }
+    });
+  </script>
+
+</body>
+</html>
