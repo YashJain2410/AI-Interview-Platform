@@ -1,0 +1,36 @@
+Yash Jain
+Machine Learning Engineer | Backend Developer
+
+Summary:
+Machine Learning Engineer with hands-on experience in building end-to-end AI systems including RAG pipelines, real-time voice agents, and backend services using FastAPI. Strong foundation in data structures, machine learning, and applied deep learning.
+
+Skills:
+- Programming: Python, C++, JavaScript
+- Machine Learning: Supervised Learning, Unsupervised Learning, Model Evaluation, Feature Engineering
+- Deep Learning: CNNs, Transfer Learning (beginner)
+- NLP: Sentence Transformers, Embeddings, RAG, Prompt Engineering
+- Backend: FastAPI, REST APIs, WebSockets, PostgreSQL
+- Vector Databases: FAISS
+- Tools & Libraries: LangChain, HuggingFace, OpenCV, NumPy, Pandas
+- Cloud & DevOps: Docker, Git, Linux
+
+Projects:
+AI Real-Time Interview Platform:
+- Built a real-time AI interviewer using STT → LLM → TTS pipeline.
+- Implemented Retrieval-Augmented Generation (RAG) using FAISS and Sentence Transformers.
+- Used WebRTC for low-latency voice communication.
+- Integrated multiple LLMs using an aggregation strategy.
+
+Machine Learning Projects:
+- Credit Card Fraud Detection using supervised learning.
+- Movie Recommendation System using collaborative filtering.
+- Car Price Prediction using regression models.
+
+Experience:
+Machine Learning Coordinator – Technical Clubs
+- Conducted AI bootcamps and interviews for club recruitment.
+- Mentored students in machine learning and project development.
+
+Education:
+Bachelor of Technology in Computer Science
+KIET Group of Institutions, India

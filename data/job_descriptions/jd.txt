@@ -1,0 +1,24 @@
+Job Title: Machine Learning Engineer
+
+Job Description:
+We are looking for a Machine Learning Engineer to build scalable AI-powered applications. The candidate will work on NLP, embeddings, and retrieval-based systems to improve user experience.
+
+Responsibilities:
+- Design and implement machine learning pipelines for production systems.
+- Build Retrieval-Augmented Generation (RAG) pipelines using vector databases.
+- Work with embeddings, semantic search, and similarity matching.
+- Develop backend services using FastAPI or similar frameworks.
+- Collaborate with cross-functional teams to deploy AI features.
+
+Requirements:
+- Strong proficiency in Python and data structures.
+- Experience with machine learning and NLP techniques.
+- Hands-on experience with Sentence Transformers or similar embedding models.
+- Experience using FAISS or other vector databases.
+- Knowledge of REST APIs and backend development.
+- Familiarity with prompt engineering and LLM-based systems is a plus.
+
+Preferred Qualifications:
+- Experience with real-time systems such as WebSockets or WebRTC.
+- Knowledge of Docker and cloud deployment.
+- Prior experience building AI interview or assessment platforms.
