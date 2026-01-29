@@ -4,17 +4,34 @@ from backend.ai.llm_router.base import LLMResponse
 from backend.ai.rag.retriever import RAGRetriever
 from backend.ai.rag.context_builder import build_interview_context
 
+from backend.mcp.host.host import MCPHost
+from backend.mcp.server.interview_server import InterviewContextServer
+from backend.mcp.server.rag_server import RAGContextServer
+
 class AIInterview:
     def __init__(self):
         self.llm_router = LLMRouter()
-        self.resume_rag = RAGRetriever(tag="resume")
-        self.jd_rag = RAGRetriever(tag="jd")
+        
+        # MCP Host orchestrate all context providers
+        self.mcp_host = MCPHost(
+            servers=[
+                InterviewContextServer(),
+                RAGContextServer()
+            ]
+        )
 
     async def ask_question(self, stage: str) -> str:
         """
         Initial interview question (stage-based, no candidate answer yet)
         """
-        prompt = load_prompt("interviewer.txt").format(stage = stage, context = "No prior context available.")
+
+        context = await self.mcp_host.collect_context(stage = stage)
+
+        prompt = load_prompt("interviewer.txt").format(
+            stage = context["interview_stage"],
+            context = "No prior context available."
+        )
+
         response: LLMResponse = await self.llm_router.generate(prompt)
         return response.text
     
@@ -23,18 +40,16 @@ class AIInterview:
         Follow-up question using RAG (resume + Job description + last answer)
         """
 
-        resume_chunks = self.resume_rag.retrieve(answer)
-        jd_chunks = self.jd_rag.retrieve(answer)
-
-        context = build_interview_context(
-            resume_chunks = resume_chunks,
-            jd_chunks=jd_chunks,
-            last_answer=answer
+        context = await self.mcp_host.collect_context(
+            stage = stage,
+            answer = answer,
+            question = None
         )
 
-        prompt = load_prompt("interviewer.txt").format(
-            stage = stage,
-            context = context
+        prompt = load_prompt("followup.txt").format(
+            stage = context["interview_stage"],
+            context = context["rag_context"],
+            answer = answer
         )
 
         response: LLMResponse = await self.llm_router.generate(prompt)
