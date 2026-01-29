@@ -5,7 +5,7 @@ class EvaluationContextServer(MCPServer):
     def __init__(self):
         self.evaluator = InterviewEvaluator()
 
-    async def get_context(self, question: str | None = None, answer: str | None = None) -> dict:
+    async def get_context(self, question: str | None = None, answer: str | None = None, **kwargs) -> dict:
         """Evaluates candidate's answer if question + answer exists"""
 
         if not question or not answer:

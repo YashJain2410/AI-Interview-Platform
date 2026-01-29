@@ -9,9 +9,12 @@ async def main():
     print(q1)
 
     print("\n---Follow-up---")
-    q2 = await interviewer.ask_followup(
-        "I have worked with Random Forest and Decision Trees."
+    q2, evaluation = await interviewer.ask_followup(
+        answer="I have worked with Random Forest and Decision Trees.",
+        stage="technical",
+        previous_question=q1
     )
-    print(q2)
+    print("AI: ", q2)
+    print("Evaluation: ", evaluation)
 
 asyncio.run(main())

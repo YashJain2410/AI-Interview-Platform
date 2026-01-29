@@ -7,6 +7,7 @@ from backend.ai.rag.context_builder import build_interview_context
 from backend.mcp.host.host import MCPHost
 from backend.mcp.server.interview_server import InterviewContextServer
 from backend.mcp.server.rag_server import RAGContextServer
+from backend.mcp.server.evaluation_server import EvaluationContextServer
 
 class AIInterview:
     def __init__(self):
@@ -16,7 +17,8 @@ class AIInterview:
         self.mcp_host = MCPHost(
             servers=[
                 InterviewContextServer(),
-                RAGContextServer()
+                RAGContextServer(),
+                EvaluationContextServer()
             ]
         )
 
@@ -35,7 +37,7 @@ class AIInterview:
         response: LLMResponse = await self.llm_router.generate(prompt)
         return response.text
     
-    async def ask_followup(self, answer: str, stage: str = "technical") -> str:
+    async def ask_followup(self, answer: str, stage: str = "technical", previous_question: str | None = None) -> tuple[str, dict | None]:
         """
         Follow-up question using RAG (resume + Job description + last answer)
         """
@@ -43,8 +45,10 @@ class AIInterview:
         context = await self.mcp_host.collect_context(
             stage = stage,
             answer = answer,
-            question = None
+            question = previous_question
         )
+
+        evaluation = context.get("evaluation")
 
         prompt = load_prompt("followup.txt").format(
             stage = context["interview_stage"],
@@ -53,4 +57,4 @@ class AIInterview:
         )
 
         response: LLMResponse = await self.llm_router.generate(prompt)
-        return response.text
+        return response.text, evaluation
