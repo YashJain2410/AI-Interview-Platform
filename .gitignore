@@ -1,37 +1,66 @@
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# Environment variables and local secrets
 .env
+.env.*
+!.env.example
+
+# Python environments and bytecode
+.venv/
 venv/
-.env.local
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
 
-# Node
-node_modules/
-dist/
+# Python tooling and test output
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+
+# Python packaging and build output
 build/
+dist/
+*.egg-info/
+.eggs/
+wheelhouse/
+pip-wheel-metadata/
 
-# OS
-.DS_Store
-Thumbs.db
+# JavaScript dependencies and build output
+node_modules/
+.next/
+.nuxt/
+.svelte-kit/
 
-# IDE
-.vscode/
-.idea/
+# Generated application data
+data/embeddings/
+Audio/
 
-# Logs
+# Local logs, runtime files, and temporary media
 *.log
-
-# Audio / temp
+*.pid
+*.pid.lock
 *.wav
 *.mp3
 *.ogg
-
-# Docker
-*.pid
-
-
 *.pcm
+*.flac
+*.m4a
 *.pkl
-Audio/
+
+# Local archives and OS metadata
+*.zip
+.DS_Store
+Thumbs.db
+
+# Editor and IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

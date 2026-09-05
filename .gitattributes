@@ -1,0 +1,23 @@
+# Keep repository text files portable across operating systems.
+* text=auto eol=lf
+
+# Preserve binary formats exactly as written.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.mp3 binary
+*.wav binary
+*.ogg binary
+*.flac binary
+*.m4a binary
+*.pkl binary
+*.npy binary
+*.npz binary
+*.bin binary
+*.pt binary
+*.pth binary
