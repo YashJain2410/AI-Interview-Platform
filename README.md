@@ -104,8 +104,10 @@ Final Interview Report
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **WebRTC** – Real-time audio streaming from browser
-- **JavaScript (Browser APIs)** – Microphone access & live playback
+- **React + TypeScript + Vite** – Component-based, type-safe client
+- **React Router** – Dashboard, setup, live room, reports, history, and settings
+- **WebRTC + WebSockets** – Real-time audio, transcript, and interview events
+- **Responsive design system** – Accessible layouts for desktop and mobile
 - **Voice Activity Detection (VAD)** – Natural turn-taking and interruption handling
 - **Vercel** – Frontend deployment
 

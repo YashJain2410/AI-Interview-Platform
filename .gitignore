@@ -33,6 +33,7 @@ pip-wheel-metadata/
 
 # JavaScript dependencies and build output
 node_modules/
+*.tsbuildinfo
 .next/
 .nuxt/
 .svelte-kit/
