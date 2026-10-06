@@ -65,3 +65,57 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Local planning, implementation audits, and agent notes
+**/*[Pp]lan*.md
+**/*[Aa]udit*.md
+**/*[Ss]cratch*.md
+**/*[Ss]ession_[Nn]otes*.md
+/plans/
+/notes/
+/scratch/
+AGENTS.local.md
+.agents/
+.codex/
+.claude/
+
+# Local cloud credentials and key material
+.aws/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Private candidate inputs and generated records
+/data/resumes/*
+/data/job_descriptions/*
+/data/transcripts/
+/data/reports/
+/data/sessions/
+/data/uploads/
+!data/resumes/.gitkeep
+!data/job_descriptions/.gitkeep
+
+# Model artifacts, array dumps, and notebooks
+.cache/
+*.npy
+*.npz
+*.pt
+*.pth
+.ipynb_checkpoints/
+
+# Frontend tooling / hosting output
+.vite/
+.vercel/
+.netlify/
+coverage/
+playwright-report/
+test-results/
+
+# Accidental lockfiles outside the actual frontend project
+/package-lock.json
+/frontend/package-lock.json
+
+# Local temporary output
+*.tmp
+*.temp

@@ -1,200 +1,92 @@
-# AI Real-Time Voice Interview Platform
+# Phantom Interview
 
-A **real-time, voice-first AI interview system** that conducts adaptive technical and HR interviews using **live speech, multi-LLM orchestration, resume-aware RAG, LLM-based evaluation, and MCP-driven agent architecture.**
+**AI interview practice with answer-aware questions, resume retrieval, and a browser voice interface.**
 
-Built to demonstrate how modern **AI voice agents and LLM systems are engineered in production**, not just how APIs are used.
+Built by **Yash Jain** to explore the engineering behind an AI interviewer: real-time audio, model orchestration, retrieval, and structured feedback.
 
-## Overview
+[Architecture](docs/architecture.md) · [Local setup](docs/getting_started.md) · [API](docs/api.md) · [Project status](docs/project_status.md)
 
-This platform simulates a **real interviewer**, not a chatbot.
+## At a glance
 
-It conducts **live voice interviews** through the browser, dynamically adapts questions based on the candidate’s **resume and job description**, evaluates answers using a **rubric-based LLM scoring engine**, and produces a **structured final interview report**.
+| What | Why it matters |
+|---|---|
+| React interview workspace | Brings setup, conversation, and example feedback into one candidate journey. |
+| FastAPI + WebSockets | Keeps text questions and answers on a persistent connection. |
+| WebRTC audio pipeline | Connects browser audio to speech recognition, AI generation, and speech synthesis. |
+| Resume and job retrieval | Grounds follow-up prompts in relevant document passages. |
+| Gemini + Hugging Face | Separates model providers behind a shared response interface. |
+| Rubric-based evaluation | Produces structured scores and written improvement suggestions. |
 
-**The system is designed with**:
+**Current stage: development prototype.** Text interview wiring and AI components exist; voice has known integration defects. Dashboard, history, and report screens use sample data. Authentication, saved reports, and production deployment are not implemented. See [verified scope and limitations](docs/project_status.md).
 
-- real-time constraints
-- modular AI orchestration
-- explainable evaluation
-- production-ready architecture
+## Demo
 
-## ✨ Key Features
+**Walkthrough video: coming after the platform is completed.**
 
-### Real-Time Voice Interview
-- Live **WebRTC-based voice interaction**
-- **Voice Activity Detection (VAD)** for natural turn-taking
-- Low-latency streaming audio pipeline (PCM16 standardized)
+To explore the interface today, run the frontend below. Review dashboard → interview setup → live room → example report. With no backend, the live room can show demo responses; this demonstrates the interface, not a completed AI interview.
 
-### Adaptive AI Interviewer
-- Stage-aware questioning (HR / Technical)
-- Contextual follow-ups probing **depth and reasoning**
-- Prompt-controlled interviewer behavior
+## How it works
 
-### Resume & Job-Aware RAG
-- Retrieval-Augmented Generation over:
-  - Candidate resume
-  - Job description
-- FAISS-based vector search with Sentence Transformers
-- Structured context injection (no prompt stuffing)
+```mermaid
+flowchart LR
+    Browser[React browser] <-->|Text WebSocket| API[FastAPI]
+    Browser <-->|WebRTC audio| Voice[Speech pipeline]
+    Voice --> AI[AI interviewer]
+    API --> AI
+    AI --> Context[Interview rules + document retrieval]
+    Context --> Models[Gemini + Hugging Face]
+    Models --> Question[Next question]
+```
 
-### Multi-LLM Orchestration
-- Parallel use of **Gemini** and **Hugging Face models**
-- Latency-aware response selection
-- Fault-tolerant LLM aggregation
+Text and voice currently create separate interview instances. The voice path uses Whisper and Edge TTS; its complete round trip is not yet working reliably.
 
-### Interview Scoring & Feedback
-- **LLM-as-a-Judge** with explicit evaluation rubric
-- Scores across technical depth, clarity, communication, and confidence
-- Explainable strengths, weaknesses, and improvement suggestions
+## Engineering highlights
 
-### MCP-Based Agent Architecture
-- Implements **Model Context Protocol (MCP)**
-- Independent context servers for:
-  - Interview logic
-  - RAG retrieval
-  - Evaluation
-- Central host orchestrates structured context injection
+- **Provider abstraction:** common response objects carry text, provider, latency, and errors; generation runs concurrently across two providers.
+- **Focused context:** text documents are chunked and indexed with FAISS; the latest answer retrieves passages for follow-up prompts.
+- **Explicit contracts:** WebSocket events drive text interaction; Pydantic models define evaluation output.
+- **Clear boundaries:** transport, speech processing, prompts, retrieval, evaluation, and session state live in separate modules.
 
-### Final Interview Report
-- Auto-generated at session end
-- Aggregated scores, insights, and hiring verdict
-- Designed for dashboards, PDFs, and analytics
+[Design decisions and trade-offs](docs/architecture.md#design-decisions) explain the costs and limits of these choices. No latency, accuracy, or scale benchmarks are claimed.
 
----
+## Try the interface
 
-## 🏗️ System Architecture
+Use a current Node.js LTS release compatible with the installed Vite version. The frontend lockfile records the dependency versions.
+
+```bash
+cd frontend/web
+npm ci
+cp .env.example .env
+npm run dev
+```
+
+Open the local URL printed by Vite. Backend setup needs provider credentials, speech dependencies, and local retrieval indexes; follow [the backend guide](docs/getting_started.md#backend-development).
+
+## Repository map
 
 ```text
-Browser (WebRTC)
-   ↓
-Voice Activity Detection (VAD)
-   ↓
-Audio Pipeline (PCM16)
-   ├── Whisper STT
-   ├── AI Interviewer (LLM Router)
-   │     ├── Gemini
-   │     ├── Hugging Face
-   │     └── LLM Aggregation
-   ├── Edge TTS
-   ↓
-WebRTC Audio Output
+frontend/web/       React + TypeScript interface
+backend/api/        FastAPI application
+backend/realtime/   WebRTC, WebSockets, speech pipeline, sessions
+backend/ai/         Interviewer, model router, prompts, RAG, evaluation
+backend/mcp/        In-process context host and providers
+backend/memory/     In-memory session and evaluation state
+tests/             Manual experiments; not a regression suite
+docs/              Setup, contracts, design, and operations
 ```
 
-### AI Orchestration Layer
-```text
-AIInterview
-   ↓
-MCP Host
-   ├── Interview Context Server
-   ├── RAG Context Server
-   ├── Evaluation Context Server
-   ↓
-LLM Router
-```
+The `mcp` directory is an in-process context abstraction; it does not implement the standard MCP wire protocol.
 
-### Post-Interview
-```text
-Session Memory
-   ↓
-Report Generator
-   ↓
-Final Interview Report
-```
+## Documentation
 
----
-## 🛠️ Tech Stack
+| Start here | Go deeper |
+|---|---|
+| [Setup and troubleshooting](docs/getting_started.md) | [Architecture](docs/architecture.md) |
+| [API and event examples](docs/api.md) | [Retrieval](docs/rag_design.md) |
+| [Current capabilities](docs/project_status.md) | [Voice pipeline](docs/realtime_pipeline.md) |
+| [Validation](docs/testing.md) | [Context orchestration](docs/mcp_design.md) |
+| [Deployment and operations](docs/deployment.md) | [Security and data handling](SECURITY.md) |
 
-### Frontend
-- **React + TypeScript + Vite** – Component-based, type-safe client
-- **React Router** – Dashboard, setup, live room, reports, history, and settings
-- **WebRTC + WebSockets** – Real-time audio, transcript, and interview events
-- **Responsive design system** – Accessible layouts for desktop and mobile
-- **Voice Activity Detection (VAD)** – Natural turn-taking and interruption handling
-- **Vercel** – Frontend deployment
+[Security](SECURITY.md) · [License status](docs/licensing.md)
 
-### Backend
-- **FastAPI** – Async backend & WebSocket server
-- **WebSockets** – Real-time interview communication
-- **aiortc** – Server-side WebRTC handling
-- **AsyncIO** – Concurrent audio and LLM pipelines
-- **Render** – Backend deployment
-
-### AI & Machine Learning
-- **Google Gemini** – Fast conversational LLM
-- **Hugging Face Inference API** – Open-source LLMs
-- **Multi-LLM Orchestration** – Latency-aware routing & fallback
-- **Whisper (OpenAI)** – Speech-to-Text (STT)
-- **Edge TTS (Microsoft Neural Voices)** – Low-latency Text-to-Speech
-- **Sentence Transformers** – Text embeddings
-- **FAISS** – Vector similarity search
-- **Retrieval-Augmented Generation (RAG)** – Resume & JD-aware questioning
-
-### AI System Design
-- **Model Context Protocol (MCP)** – Modular agent-based architecture
-- **LLM-as-a-Judge** – Rubric-based answer evaluation
-- **Prompt Engineering** – Controlled interviewer behavior
-- **Session Memory** – Stateful interview tracking
-- **Context Orchestration** – Structured prompt injection
-
-### Infrastructure & Tooling
-- **Environment-based configuration (`.env`)**
-- **Modular project structure**
-- **Production-ready async design**
-- **Extensible for Docker & CI/CD**
-
----
-## 📁 Project Structure
-```text 
-ai-voice-interviewer/
-│
-├── frontend/
-│   └── web/                # WebRTC client
-│
-├── backend/
-│   ├── api/                # FastAPI entry point
-│   ├── realtime/
-│   │   ├── websocket/      # Interview & audio sockets
-│   │   ├── webrtc/         # WebRTC tracks & signaling
-│   │   └── audio_stream/   # STT → AI → TTS pipeline
-│   │
-│   ├── ai/
-│   │   ├── llm_router/     # Multi-LLM orchestration
-│   │   ├── rag/            # Resume/JD RAG
-│   │   ├── prompts/        # Prompt templates
-│   │   └── evaluation/     # Scoring & report generation
-│   │
-│   ├── mcp/
-│   │   ├── host/           # MCP orchestrator
-│   │   └── servers/        # Context servers
-│   │
-│   ├── memory/             # Session & evaluation memory
-│   └── infra/              # Config, logging
-│
-├── data/
-│   ├── resumes/
-│   ├── job_descriptions/
-│   └── embeddings/
-│
-├── scripts/                # Ingestion & testing
-├── docs/                   # Architecture & design docs
-└── README.md
-```
-
----
-
-## Deployment
-
-- **Backend** deployed on **Render**
-  - Async FastAPI + WebSockets + WebRTC
-
-- **Frontend** deployed on **Vercel**
-  - Low-latency static hosting for WebRTC client
-
-- Environment-driven configuration allows seamless scaling and provider switching
-
----
-
-## Author
-**Yash Jain**  
-AI / ML Engineer • Backend Engineer  
-
-> Built with a strong focus on **correctness, scalability, and real-world AI system design**.
+**Author:** Yash Jain · AI systems and backend engineering

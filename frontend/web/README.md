@@ -1,25 +1,19 @@
-# Interview Web
+# Interview interface
 
-The production-ready React frontend for the AI voice interview platform. It includes the full candidate journey: overview, interview setup, live voice room, reports, history, and preferences.
+React + TypeScript + Vite frontend for Phantom Interview. Routes cover dashboard, setup, live room, sample reports, history, and settings. Most analytics/report values are examples; this is a development interface.
 
-## Run locally
+## Local use
 
 ```bash
-npm install
+npm ci
 cp .env.example .env
 npm run dev
 ```
 
-The frontend expects the FastAPI service at `http://localhost:8000` by default. Use `VITE_API_URL` and `VITE_WS_URL` to point at a deployed backend.
+Run from this directory. Use the URL printed by Vite. `npm run build` compiles to `dist`; `npm run preview` serves that build locally.
 
-## Backend integration
+`VITE_API_URL` selects the HTTP origin; `VITE_WS_URL` selects the socket origin. Both are public build-time configuration. Never put provider keys here.
 
-- `POST /webrtc/offer` for live microphone/audio negotiation
-- `WS /ws/interview` for interview questions and text answers
-- `WS /ws/audio` is supported by the backend and can be added as an alternate streaming transport
+Text uses `/ws/interview`; microphone signaling uses `/webrtc/offer`. Voice has known backend defects. The frontend does not use `/ws/audio`. Fallback demo questions and static reports do not establish backend success.
 
-When the backend is unavailable, the live room enters a clearly labelled demo mode so the full interface remains reviewable.
-
-## Deploy on Vercel
-
-Set the project root to `frontend/web`, use `npm run build`, and publish `dist`. Add the production API and WebSocket URLs as Vercel environment variables.
+See [setup](../../docs/getting_started.md), [API](../../docs/api.md), and [hosting](../../docs/deployment.md) for details. UI routes and behavior live in `src/App.tsx`; styling lives in `src/styles.css`.
