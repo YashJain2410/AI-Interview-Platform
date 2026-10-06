@@ -1,4 +1,4 @@
-# Phantom Interview
+# Interview
 
 **AI interview practice with answer-aware questions, resume retrieval, and a browser voice interface.**
 

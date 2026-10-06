@@ -1,6 +1,6 @@
 # Interview interface
 
-React + TypeScript + Vite frontend for Phantom Interview. Routes cover dashboard, setup, live room, sample reports, history, and settings. Most analytics/report values are examples; this is a development interface.
+React + TypeScript + Vite frontend for Interview. Routes cover dashboard, setup, live room, sample reports, history, and settings. Most analytics/report values are examples; this is a development interface.
 
 ## Local use
 
