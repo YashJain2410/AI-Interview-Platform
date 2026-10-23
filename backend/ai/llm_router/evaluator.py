@@ -1,4 +1,4 @@
-from .gemini_llm import GeminiLLM
+from .router import LLMRouter
 
 class LLMResponseEvaluator:
     """
@@ -6,7 +6,7 @@ class LLMResponseEvaluator:
     """
 
     def __init__(self):
-        self.judge_llm = GeminiLLM()
+        self.judge_llm = LLMRouter()
 
     async def score(self, question: str, answer: str) -> float:
         prompt = f"""
@@ -28,6 +28,6 @@ Score this question on a scale of 0 to 10 based on:
         result = await self.judge_llm.generate(prompt)
 
         try:
-            return float(result.strip())
+            return float(result.text.strip())
         except Exception:
             return 0.0

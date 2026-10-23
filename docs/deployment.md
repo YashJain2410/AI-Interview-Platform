@@ -1,6 +1,8 @@
 # Vercel frontend + Render backend
 
-The hosted API uses lightweight HTTP calls to Gemini (and optional Hugging Face fallback).
+The hosted API uses lightweight HTTP calls to one explicitly selected provider and model.
+Google Gemini is the default. Automatic provider/model fallback and retries are disabled.
+See [model configuration](model_configuration.md) for provider options and tuning.
 The browser uses one WebSocket for questions, answers, and the final report. Browser speech
 recognition dictates into the answer editor; browser speech synthesis reads questions aloud.
 The original Whisper/WebRTC experiment remains separate and disabled by default.
@@ -11,8 +13,8 @@ The original Whisper/WebRTC experiment remains separate and disabled by default.
 - Build: `pip install -r requirements.txt`
 - Start: `uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT --workers 1`
 - Health check: `/health`
-- Secret environment: `GEMINI_API_KEY`; optional `HF_API_TOKEN`.
-- `GEMINI_MODEL=gemini-2.5-flash`
+- Secret environment: `GEMINI_API_KEY` for the default Google provider.
+- `LLM_PROVIDER=google` and `LLM_MODEL=gemini-3.8-flash`.
 - `ALLOWED_ORIGINS=https://<production-frontend>.vercel.app` (comma-separated exact origins).
 - `render.yaml` records the service configuration without secrets.
 

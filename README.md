@@ -14,7 +14,7 @@ Built by **Yash Jain** to explore the engineering behind an AI interviewer: real
 | FastAPI + WebSockets | Keeps text questions and answers on a persistent connection. |
 | WebRTC audio pipeline | Connects browser audio to speech recognition, AI generation, and speech synthesis. |
 | Resume and job retrieval | Grounds follow-up prompts in relevant document passages. |
-| Gemini + Hugging Face | Separates model providers behind a shared response interface. |
+| Configurable AI providers | Select one provider and model through server environment settings, with silent fallback disabled. |
 | Rubric-based evaluation | Produces structured scores and written improvement suggestions. |
 
 **Current stage: hosted practice app.** The lightweight FastAPI entry point supports role-specific AI interviews, document context, answer-aware follow-ups, and structured reports. Voice uses browser dictation and speech synthesis in the same session. Reports and preferences are saved in the browser. User accounts and cloud report storage are not implemented. See [deployment setup and limits](docs/deployment.md).
@@ -34,7 +34,7 @@ flowchart LR
     Voice --> AI[AI interviewer]
     API --> AI
     AI --> Context[Interview rules + document retrieval]
-    Context --> Models[Gemini + Hugging Face]
+    Context --> Models[Configured provider + model]
     Models --> Question[Next question]
 ```
 
@@ -42,7 +42,7 @@ The hosted path uses one interview WebSocket for typed and dictated answers. The
 
 ## Engineering highlights
 
-- **Provider abstraction:** common response objects carry text, provider, latency, and errors; generation runs concurrently across two providers.
+- **Provider abstraction:** one shared service routes hosted and experimental paths to the selected model. Responses carry provider, model, text, and latency; failures never trigger silent fallback. See [model configuration](docs/model_configuration.md).
 - **Focused context:** text documents are chunked and indexed with FAISS; the latest answer retrieves passages for follow-up prompts.
 - **Explicit contracts:** WebSocket events drive text interaction; Pydantic models define evaluation output.
 - **Clear boundaries:** transport, speech processing, prompts, retrieval, evaluation, and session state live in separate modules.

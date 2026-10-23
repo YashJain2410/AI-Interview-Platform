@@ -8,6 +8,7 @@ A successful build is useful evidence, but it does not establish that an intervi
 |---|---|---|
 | Frontend build | `cd frontend/web && npm run build` | TypeScript compilation and production bundling |
 | Built UI review | `npm run preview` in `frontend/web` | Manual inspection of the compiled interface |
+| Hosted API and provider contracts | `.venv/bin/python -m unittest discover -s tests/deployment -v` | Offline socket lifecycle, provider payloads, configuration, deadlines, and no-fallback behavior |
 | Backend health | `curl http://localhost:8000/health` | App startup and route response; not provider readiness |
 | Text socket experiment | `python -m tests.test_ws_test` from root | Manual session/question/follow-up exchange if backend and providers work |
 
@@ -17,7 +18,7 @@ The text experiment can send provider requests and incur charges. It prints resu
 
 Most `tests/test_*.py` files are executable experiments with provider calls, model loads, files, or a running server. Some execute at import; some use stale APIs or absolute Windows paths. Empty placeholder test files have been removed. The remaining tests are not a deterministic regression suite.
 
-Do not treat full pytest discovery as a reliable offline check. There is no CI workflow, coverage claim, deterministic regression suite, or load-test result.
+Do not treat full pytest discovery as a reliable offline check. The `tests/deployment` suite is deterministic and offline. There is no CI workflow, coverage claim, or load-test result.
 
 ## Manual acceptance review
 

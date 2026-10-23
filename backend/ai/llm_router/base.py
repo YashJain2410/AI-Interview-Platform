@@ -4,13 +4,14 @@ from typing import Optional
 
 class BaseLLM(ABC):
     @abstractmethod
-    async def generate(self, prompt: str) -> str:
+    async def generate(self, prompt: str) -> "LLMResponse":
         pass
 
-    
+
 @dataclass
 class LLMResponse:
     provider: str
     text: str
     latency: float
     error: Optional[str] = None
+    model: Optional[str] = None

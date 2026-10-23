@@ -1,13 +1,7 @@
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
+"""String-returning compatibility client backed by the configured provider."""
+from .service import llm_service
 
 
 class LLMClient:
     async def generate(self, prompt: str) -> str:
-        """
-        TEMPORARY mock LLM.
-        We will replace this with OpenAI/Gemini later.
-        """
-        return f"[AI QUESTION GENERATED BASED ON]: {prompt[:80]}..."
+        return (await llm_service.generate(prompt)).text

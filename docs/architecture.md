@@ -16,8 +16,7 @@ flowchart TD
     Host --> Judge[Answer evaluation]
     Interview --> Router[LLM router]
     Judge --> Router
-    Router --> Gemini[Gemini]
-    Router --> HF[Hugging Face]
+    Router --> Selected[One configured provider + model]
 ```
 
 Text and voice instantiate separate interviewers. This is a code dependency diagram; it does not imply a shared session or a working voice round trip.
@@ -29,7 +28,7 @@ Text and voice instantiate separate interviewers. This is a code dependency diag
 | Transport | `backend/realtime/` | Peer connections, socket messages, audio conversion |
 | Interview | `backend/ai/interviewer.py` | Creates prompts and requests the next question |
 | Context | `backend/mcp/` | Combines rules, retrieved passages, and optional evaluation |
-| Models | `backend/ai/llm_router/` | Calls providers, scores responses, selects a result |
+| Models | `backend/ai/llm_router/` | Validates provider settings, makes one bounded request, rejects failed/incomplete output |
 | State | `backend/realtime/sessions/`, `backend/memory/` | Process-local sessions and evaluation lists |
 
 ## Design decisions
@@ -38,12 +37,12 @@ Text and voice instantiate separate interviewers. This is a code dependency diag
 |---|---|---|
 | WebSocket text events | A persistent request/response conversation | Reconnect, event validation, and recovery are incomplete. |
 | WebRTC audio | Browser media transport and playback | ICE/TURN setup and audio lifecycle need integration validation. |
-| Concurrent model calls | More than one candidate response | Waits for both providers and adds judge calls; no measured latency advantage. |
+| Explicit model selection | Predictable routing, credentials, and request cost | Provider failure is visible; no automatic failover. |
 | Local FAISS indexes | Simple document retrieval | Fixed shared indexes; no candidate ownership or upload isolation. |
 | In-process context providers | Easy separation of responsibilities | Sequential collection; no standard MCP transport or remote service boundary. |
 | In-memory state | Simple local development | Lost on restart and unavailable across workers. |
 
-The response judge currently misreads the provider response object and falls back to zero scores. Selection therefore does not provide reliable quality ranking.
+The shared model service uses exactly one provider for questions and evaluation. It does not generate competing responses or call a ranking judge. See [model configuration](model_configuration.md).
 
 ## State and lifecycle
 

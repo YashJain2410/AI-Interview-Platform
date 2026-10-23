@@ -7,7 +7,7 @@ Source-reviewed on **October 6, 2026**. This describes the checked-in implementa
 | Interface | Dashboard, setup, live room, reports, history, settings | Analytics and reports are fixed examples; settings/history are not backed by storage. |
 | Text interview | Session start, first question, answer-based follow-ups | Needs providers and indexes; no automatic stage progression or final report. |
 | Retrieval | Text chunking, embeddings, FAISS search | Local shared indexes; file picker does not upload documents. |
-| Model routing | Concurrent Gemini/Hugging Face generation | Judge parsing defect; no validated timeout/retry policy. |
+| Model routing (updated October 23, 2026) | Explicit provider/model selection; Gemini 3.8 Flash default; bounded requests and no fallback | Provider contracts covered by offline tests; live account/model access must be verified. |
 | Evaluation | Four-dimension rubric and JSON schema | Internal results only; score bounds and totals are not enforced. |
 | Voice | Mic capture, SDP endpoint, speech components | Tuple passed to TTS; invalid audio timestamp; incomplete lifecycle cleanup. |
 | Audio socket | Route exists | Calls a missing method; frontend does not use it. |

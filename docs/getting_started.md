@@ -74,14 +74,14 @@ If startup succeeds, check `http://localhost:8000/health` and `/docs`; then use 
 
 | Variable | Used by | Purpose |
 |---|---|---|
-| `GEMINI_API_KEY` | Gemini client | Server-side provider credential |
-| `GEMINI_MODEL` | Gemini client | Optional model override |
-| `HF_API_TOKEN` | Hugging Face client | Server-side provider credential |
-| `HF_MODEL` | Hugging Face client | Optional model override |
+| `LLM_PROVIDER` | Shared model service | Explicit provider; defaults to `google` |
+| `LLM_MODEL` | Shared model service | Explicit model; Google defaults to `gemini-3.8-flash` |
+| `GEMINI_API_KEY` | Google adapter | Server-side credential for the default provider |
+| `GEMINI_MODEL` | Google adapter | Legacy model setting when `LLM_MODEL` is blank |
 | `VITE_API_URL` | Frontend | HTTP backend origin |
 | `VITE_WS_URL` | Frontend | WebSocket backend origin |
 
-The root `.env` supplies backend credentials. `frontend/web/.env` supplies browser configuration. Vite variables are public build-time values; never put secrets in them. FAISS paths are currently hardcoded under `data/embeddings/`.
+See [model configuration](model_configuration.md) for all providers, keys, and request limits. The root `.env` supplies backend credentials. `frontend/web/.env` supplies browser configuration. Vite variables are public build-time values; never put secrets in them. FAISS paths are currently hardcoded under `data/embeddings/`.
 
 ## Troubleshooting
 

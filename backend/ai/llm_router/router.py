@@ -1,14 +1,8 @@
-from .gemini_llm import GeminiLLM
-from .huggingface_llm import HuggingFaceLLM
-from .aggregator import LLMAggregator
+"""Compatibility entry point for interview and evaluation pipelines."""
 from .base import LLMResponse
+from .service import llm_service
+
 
 class LLMRouter:
-    def __init__(self):
-        self.aggregator = LLMAggregator([
-            GeminiLLM(),
-            HuggingFaceLLM()
-        ])
-        
     async def generate(self, prompt: str) -> LLMResponse:
-        return await self.aggregator.generate(prompt)
+        return await llm_service.generate(prompt)
