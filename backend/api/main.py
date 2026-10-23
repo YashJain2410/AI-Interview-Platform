@@ -1,23 +1,26 @@
+"""Lightweight hosted API. Experimental local WebRTC stays opt-in."""
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
-from backend.realtime.websockets.router import router as interview_ws_router
-from backend.realtime.websockets.audio_router import router as audio_ws_router
-from backend.realtime.webrtc.router import router as webrtc_router
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="AI Real-Time Voice Interview Platform")
+load_dotenv()
+from backend.api.interviews import router
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app = FastAPI(title="Interview API")
+origins = [x.strip().rstrip('/') for x in os.getenv(
+    'ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:4173'
+).split(',') if x.strip()]
+app.state.allowed_origins = origins
+app.add_middleware(CORSMiddleware, allow_origins=origins,
+                   allow_methods=['GET', 'POST'], allow_headers=['Content-Type'])
+app.include_router(router)
 
-app.include_router(interview_ws_router)
-app.include_router(audio_ws_router)
-app.include_router(webrtc_router)
-
-@app.get("/health")
+@app.get('/health')
 async def health_check():
-    return {"status" : "ok"}
+    return {'status': 'ok', 'ai_configured': bool(os.getenv('GEMINI_API_KEY') or os.getenv('HF_API_TOKEN')),
+            'voice': 'browser', 'version': '2'}
+
+if os.getenv('ENABLE_EXPERIMENTAL_AUDIO') == 'true':
+    from backend.realtime.webrtc.router import router as audio_router
+    app.include_router(audio_router)

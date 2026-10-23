@@ -1,50 +1,54 @@
-# Deployment and operations
+# Vercel frontend + Render backend
 
-The frontend can be hosted as an interface demonstration. The backend is a development prototype with unresolved startup, voice, security, and persistence gaps. No live deployment is verified in this repository.
+The hosted API uses lightweight HTTP calls to Gemini (and optional Hugging Face fallback).
+The browser uses one WebSocket for questions, answers, and the final report. Browser speech
+recognition dictates into the answer editor; browser speech synthesis reads questions aloud.
+The original Whisper/WebRTC experiment remains separate and disabled by default.
 
-## Frontend hosting
+## Render
 
-| Setting | Value |
-|---|---|
-| Project root | `frontend/web` |
-| Install | `npm ci` |
-| Build | `npm run build` |
-| Output | `dist` |
-| HTTP origin | `VITE_API_URL=https://<backend-origin>` |
-| Socket origin | `VITE_WS_URL=wss://<backend-origin>` |
+- Repository root, Python 3.12 (`.python-version`).
+- Build: `pip install -r requirements.txt`
+- Start: `uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT --workers 1`
+- Health check: `/health`
+- Secret environment: `GEMINI_API_KEY`; optional `HF_API_TOKEN`.
+- `GEMINI_MODEL=gemini-2.5-flash`
+- `ALLOWED_ORIGINS=https://<production-frontend>.vercel.app` (comma-separated exact origins).
+- `render.yaml` records the service configuration without secrets.
 
-`frontend/web/vercel.json` provides an SPA rewrite to `index.html`. Other hosts need an equivalent rule. Environment values are embedded during the build; rebuild to change them. Verify direct navigation to `/interview/live` and `/reports/latest`.
+## Vercel
 
-Use HTTPS for hosted microphone access. Clearly label demo responses, static charts, and sample reports in any published walkthrough.
+Import only `frontend/web` with the Vite preset. Build with `npm run build`, install with
+`npm ci`, and serve `dist`. The committed `vercel.json` handles React Router deep links.
+Set `VITE_API_URL=https://<service>.onrender.com` and optionally
+`VITE_WS_URL=wss://<service>.onrender.com`, then rebuild. These are public URLs; never
+put provider credentials into `VITE_*` variables.
 
-## Backend operating constraints
+## Verification
 
-```mermaid
-flowchart LR
-    Browser[HTTPS browser] --> Proxy[TLS + WebSocket proxy]
-    Proxy --> App[Single FastAPI worker]
-    App --> Local[Local models + trusted indexes]
-    App --> Providers[External AI and speech services]
-```
+Run `npm run build --prefix frontend/web` and
+`.venv/bin/python -m unittest discover -s tests/deployment -v`.
+On the public frontend, complete setup → first AI question → answer → answer-aware
+follow-up → End interview → real feedback → history → refresh a report deep link.
+Check PDF/DOCX/TXT ingestion and microphone dictation in Chrome over HTTPS.
 
-This illustrates operating dependencies, not infrastructure already provisioned.
+## Operating limits
 
-- Start from the repository root using the [setup guide](getting_started.md). Provision ffmpeg, model caches, credentials, and trusted indexes first.
-- Keep one worker while sessions remain process-local. A restart discards sessions; more workers do not share state.
-- `/health` is a basic liveness response. It does not check provider access, retrieval readiness, or voice playback.
-- Configure TLS and WebSocket proxy upgrades; WebRTC additionally needs verified ICE candidate exchange and TURN/UDP connectivity.
-- There is no Dockerfile, Compose configuration, CI release pipeline, or backend hosting manifest.
+Render Free sleeps on idle, so the frontend waits up to two minutes while waking the API.
+Active interviews are process-local and end on restart or disconnect. Reports and profile
+preferences are saved in this browser's local storage, not in a cloud account. The API
+has bounded sessions, input sizes, provider deadlines, exact CORS/WebSocket origins, and
+basic per-IP session limits; it is a public practice app, without user accounts or durable
+server-side history. Uploaded files are extracted in memory; extracted context and answers
+are sent to the configured AI provider. Browser dictation may use the browser vendor's
+speech service. Scanned PDFs require OCR before upload.
 
-## Before public backend access
+Provider failures are visible errors and never substituted with canned interview answers.
+`/health` reports configuration presence, not provider quota or availability. Test a real
+interview after changes to credentials or models. Free hosting and external AI availability
+cannot provide an uptime guarantee.
 
-Require a verified clean install and interview lifecycle, working voice cleanup, bounded queues, provider timeouts, request limits, restricted origins, and authentication/ownership controls. Provide durable results and explicit data retention/deletion rules. Validate concurrent sessions and cross-network audio before claiming public service readiness.
+## Private files
 
-These are release conditions, not features currently provided.
-
-## Observability and recovery
-
-Current logging uses prints and can expose prompts, transcripts, and document context. Raw/processed debug audio may remain on disk. No metrics, alerts, retention policy, or redaction layer is implemented.
-
-For operations, record session IDs, error categories, provider latency, queue sizes, and active connections without logging candidate content. Investigate startup/index/provider failures separately. Stop accepting sessions before shutdown; current worker cleanup is incomplete.
-
-For a frontend rollback, redeploy a previously verified build. Backend recovery currently requires restarting the process and recreating lost sessions; there is no session backup or migration process.
+`docs/competitive-research.md`, `docs/platform-explained.md`, `.env`, and generated
+candidate data are ignored by Git. Keep secrets only in the backend environment.

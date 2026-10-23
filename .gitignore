@@ -119,3 +119,7 @@ test-results/
 # Local temporary output
 *.tmp
 *.temp
+
+# Private local research
+/docs/competitive-research.md
+/docs/platform-explained.md

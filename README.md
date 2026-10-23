@@ -17,13 +17,13 @@ Built by **Yash Jain** to explore the engineering behind an AI interviewer: real
 | Gemini + Hugging Face | Separates model providers behind a shared response interface. |
 | Rubric-based evaluation | Produces structured scores and written improvement suggestions. |
 
-**Current stage: development prototype.** Text interview wiring and AI components exist; voice has known integration defects. Dashboard, history, and report screens use sample data. Authentication, saved reports, and production deployment are not implemented. See [verified scope and limitations](docs/project_status.md).
+**Current stage: hosted practice app.** The lightweight FastAPI entry point supports role-specific AI interviews, document context, answer-aware follow-ups, and structured reports. Voice uses browser dictation and speech synthesis in the same session. Reports and preferences are saved in the browser. User accounts and cloud report storage are not implemented. See [deployment setup and limits](docs/deployment.md).
 
 ## Demo
 
 **Walkthrough video: coming after the platform is completed.**
 
-To explore the interface today, run the frontend below. Review dashboard → interview setup → live room → example report. With no backend, the live room can show demo responses; this demonstrates the interface, not a completed AI interview.
+To explore the interface today, run the frontend below. Review dashboard → interview setup → live room → example report. The live room requires the backend and a working AI provider key; connection and provider failures are shown explicitly.
 
 ## How it works
 
@@ -38,7 +38,7 @@ flowchart LR
     Models --> Question[Next question]
 ```
 
-Text and voice currently create separate interview instances. The voice path uses Whisper and Edge TTS; its complete round trip is not yet working reliably.
+The hosted path uses one interview WebSocket for typed and dictated answers. The original Whisper/WebRTC experiment is opt-in and is not part of the default deployment.
 
 ## Engineering highlights
 
@@ -60,7 +60,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Open the local URL printed by Vite. Backend setup needs provider credentials, speech dependencies, and local retrieval indexes; follow [the backend guide](docs/getting_started.md#backend-development).
+Open the local URL printed by Vite. For the hosted backend, install root `requirements.txt`, configure `.env` from `.env.example`, then run `uvicorn backend.api.main:app --reload`. No local speech model or retrieval index is needed. See [deployment](docs/deployment.md).
 
 ## Repository map
 
