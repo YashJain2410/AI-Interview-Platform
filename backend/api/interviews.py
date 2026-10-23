@@ -165,7 +165,9 @@ async def interview_socket(ws: WebSocket):
                     await ws.send_json({'event': 'error', 'content': 'Answer at least one question before requesting feedback.'})
                     continue
                 try:
-                    result = await generate(context(setup, messages) + '\nThe session is complete. Evaluate ONLY the actual '
+                    # The next unanswered question is not evidence of a weak answer.
+                    answered_turns = messages[:-1] if messages and messages[-1]['role'] == 'ai' else messages
+                    result = await generate(context(setup, answered_turns) + '\nThe session is complete. Evaluate ONLY the actual '
                         'answers in the transcript. Give constructive practice feedback, not a hiring decision. '
                         'Return JSON with scores (technical_correctness, depth_of_understanding, communication, '
                         'confidence: each an integer 0-100), summary (string), strengths, weaknesses and '

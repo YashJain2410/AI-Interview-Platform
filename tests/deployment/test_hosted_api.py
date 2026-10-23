@@ -37,7 +37,7 @@ class HostedAPITest(unittest.TestCase):
             prompts.append(prompt)
             if structured:
                 return json.dumps({'scores':dict.fromkeys(['technical_correctness','depth_of_understanding','communication','confidence'],75),'summary':'Useful practice.','strengths':['Clear answer'],'weaknesses':['Needs detail'],'improvement_suggestions':['Give a metric']})
-            return 'What tradeoff did you make?'
+            return 'What tradeoff did you make?' if len(prompts)==1 else 'Unanswered final follow-up?'
         with patch.object(interviews,'generate',fake), self.client.websocket_connect('/ws/interview',headers={'origin':'http://localhost:5173'}) as ws:
             ws.send_json({'candidate_name':'Test','role':'Backend Engineer','resume':'Built a queue processor'})
             self.assertEqual(ws.receive_json()['event'],'session_started')
@@ -56,6 +56,7 @@ class HostedAPITest(unittest.TestCase):
             self.assertEqual(len(report['messages']),3)
         self.assertIn('queue processor',prompts[0])
         self.assertIn('idempotency',prompts[1])
+        self.assertNotIn('Unanswered final follow-up?',prompts[-1])
         self.assertFalse(interviews.active_sessions)
 
     def test_disconnect_before_init_and_invalid_origin(self):
