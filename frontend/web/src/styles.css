@@ -11,3 +11,5 @@
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.voice-orb span,.voice-bars i,.pulse-loader span{animation:none!important}}
 .room-main{padding-bottom:20px}.lobby-card{min-height:560px;padding:30px}.lobby-visual{width:180px;height:180px;margin-bottom:12px}.voice-orb.large{width:115px;height:115px}.lobby-card h1{font-size:45px;margin:18px 0 8px}.lobby-card>p{font-size:16px;line-height:1.45;margin:8px 0}.checks{margin:14px 0}.hero-button{margin-top:7px}
 @media(max-width:760px){.room-main{padding:5px 10px 90px}.lobby-card{min-height:calc(100vh - 185px);padding:28px 18px}.lobby-visual{width:160px;height:160px}.lobby-card h1{font-size:36px}}
+/* Keep the only completion action reachable on small screens. */
+@media(max-width:760px){.room-header .danger-soft{display:inline-flex;min-height:42px;padding:0 12px;font-size:13px}.room-header{gap:10px}.room-meta{gap:0}.room-controls span{max-width:170px;white-space:normal}.answer-box textarea{min-width:0}.connection{max-width:55%;text-align:right;overflow-wrap:anywhere}}
